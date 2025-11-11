@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mock Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.css">
+    <style>
+        body {
+            background-color: #bbdefb;
+        }
+        header {
+            background-color: #ffffff;
+        }
+        footer {
+            background-color: #bbdefb;
+        }
+        fieldset {
+            background-color: #e1f5fe;
+        }
+        .card {
+            background-color: #f8f9fa;
+        }
+        .bg-light { 
+            background-color: #f0f0f0 !important;
+        }
+        .modal-lg {
+            max-width: 90%;
+        }
+    </style>
+</head>
+<body>
+
+<header class="bg-light">
+    <nav class="navbar navbar-light navbar-expand-lg">
+        <div class="container">
+            <img src="logo stage.jpeg" alt="Logo" height="40" class="me-2">
+        </div>
+    </nav>
+</header>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-dark mt-3 bg-light">
+                <div class="card-body">
+                    <h2 class="text-center">Mock Server Configuration</h2>
+                    <div class="d-flex justify-content-center mb-3">
+                        <textarea class="form-control bg-light" id="JSON" rows="5" style="max-width: 900px;" placeholder="JSON Example" required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-center mb-3">
+                        <button class="btn btn-primary" onclick="beautifyJSON()">Beautify JSON</button>
+                    </div>
+                    <fieldset class="p-2 mb-4 bg-light">
+                        <input type="text" class="form-control mb-3 bg-light" id="generatedLink" placeholder="Mock Server Link" readonly>
+                    </fieldset>
+                    <div class="text-center">
+                        <button class="btn btn-danger me-2" onclick="stopFunction()">Stop</button>
+                        <button class="btn btn-success me-2" onclick="generateLink()">Create Stub</button>
+                        <button class="btn btn-dark" type="button" id="historyButton" onclick="showHistory()">
+                            <i class="fas fa-history"></i> History
+                        </button>
+                    </div><br>
+                    <div>
+                        <input type="text" class="form-control mb-3" id="httpMethod" placeholder="HTTP Method (GET, POST, etc.)" required>
+                        <input type="text" class="form-control mb-3" id="urlEndpoint" placeholder="Endpoint (e.g., /api/data)" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-8">
+        <h3>Running Endpoints</h3>
+        <ul id="runningEndpoints" class="list-unstyled">
+            <!-- Running endpoints will be populated here -->
+        </ul>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h3>API Documentation</h3>
+            <div class="text-center">
+                <input type="file" class="form-control mb-3" id="swaggerFile" accept=".json,.yaml,.yml">
+                <button class="btn btn-primary" onclick="uploadSwaggerFile()">Upload Swagger</button>
+            </div>
+            <div id="swagger-ui"></div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-dark py-3 mt-3">
+    <div>
+        <p>Product by <a href="https://www.data-tricks.com" class="text-dark fw-bold">Data tricks</a></p>
+    </div>
+</footer>
+
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historyModalLabel">History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="historyContent">
+                <!-- History items will be loaded here dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui-bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui-standalone-preset.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script>
+function saveToHistory(method, endpoint, json) {
+    try {
+        let history = JSON.parse(localStorage.getItem('history')) || [];
+        const newItem = { method, endpoint, json };
+        // Check for redundancy
+        const isDuplicate = history.some(item =>
+            item.method === newItem.method &&
+            item.endpoint === newItem.endpoint &&
+            item.json === newItem.json
+        );
+        if (!isDuplicate) {
+            history.unshift(newItem); // Add new item to the beginning of history
+            localStorage.setItem('history', JSON.stringify(history));
+            console.log('History saved successfully:', newItem);
+        } else {
+            console.log('Duplicate entry not saved:', newItem);
+        }
+    } catch (error) {
+        console.error('Error saving history:', error);
+    }
+}
+
+function showHistory() {
+    try {
+        const history = JSON.parse(localStorage.getItem('history')) || [];
+        const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+        const historyContent = document.getElementById('historyContent');
+
+        historyContent.innerHTML = ''; 
+
+        if (history.length === 0) {
+            historyContent.innerHTML = '<p>No history available.</p>';
+        } else {
+            const listGroup = document.createElement('div');
+            listGroup.className = 'list-group';
+
+            history.forEach(item => {
+                const listItem = document.createElement('div');
+                listItem.className = 'list-group-item list-group-item-action';
+                listItem.innerHTML = `
+                    <strong>Method:</strong> ${item.method}<br>
+                    <strong>Endpoint:</strong> ${item.endpoint}<br>
+                    <strong>JSON:</strong> <pre>${item.json}</pre>
+                `;
+
+                // Add click event to fill inputs with history item data
+                listItem.addEventListener('click', () => {
+                    document.getElementById('httpMethod').value = item.method;
+                    document.getElementById('urlEndpoint').value = item.endpoint;
+                    document.getElementById('JSON').value = item.json;
+                    historyModal.hide(); // Hide modal after selecting
+                });
+
+                listGroup.appendChild(listItem);
+            });
+
+            historyContent.appendChild(listGroup);
+        }
+
+        historyModal.show(); // Show history modal
+        console.log('History loaded successfully:', history);
+    } catch (error) {
+        console.error('Error loading history:', error);
+    }
+}
+
+function clearHistory() {
+    try {
+        localStorage.removeItem('history');
+        const historyContent = document.getElementById('historyContent');
+        historyContent.innerHTML = ''; // Clear history content
+        console.log('History cleared successfully.');
+    } catch (error) {
+        console.error('Error clearing history:', error);
+    }
+}
+    async function uploadSwaggerFile() {
+        const fileInput = document.getElementById('swaggerFile');
+        if (fileInput.files.length === 0) {
+            alert('Please select a Swagger file.');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const fileContent = await file.text();
+        let swaggerData;
+        try {
+            if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+                swaggerData = jsyaml.load(fileContent);
+            } else if (file.name.endsWith('.json')) {
+                swaggerData = JSON.parse(fileContent);
+            } else {
+                alert('Unsupported file format. Please upload a YAML or JSON file.');
+                return;
+            }
+        } catch (error) {
+            alert('Error parsing Swagger file.');
+            console.error('Error parsing Swagger file:', error);
+            return;
+        }
+
+        displayApis(swaggerData.paths);
+    }
+
+    function displayApis(paths) {
+        const apiList = document.getElementById('runningEndpoints');
+        apiList.innerHTML = ''; // Clear existing content
+
+        for (const [endpoint, methods] of Object.entries(paths)) {
+            for (const [method, details] of Object.entries(methods)) {
+                const apiItem = document.createElement('div');
+                apiItem.className = 'api-item';
+                const body = getRequestBodyFromSwagger(details);
+                apiItem.innerHTML = `
+                    <strong>${method.toUpperCase()}</strong> ${endpoint}
+                    <button class="btn btn-outline-success btn-sm" onclick="runApi('${method}', '${endpoint}', '${body}')">Run</button>
+                    <div id="response-${method}-${endpoint}" class="response"></div>
+                `;
+                apiList.appendChild(apiItem);
+            }
+        }
+    }
+
+    function getRequestBodyFromSwagger(details) {
+        if (details.requestBody && details.requestBody.content && details.requestBody.content['application/json']) {
+            const schema = details.requestBody.content['application/json'].schema;
+            return JSON.stringify(schema ? schema.example || {} : {});
+        }
+        return '{}'; // Default to empty JSON if no body is specified
+    }
+
+    function runApi(method, endpoint, body) {
+        const apiItem = document.getElementById(`response-${method}-${endpoint}`);
+        apiItem.innerHTML = 'Running...';
+
+        const wireMockData = {
+            request: {
+                method: method.toUpperCase(),
+                url: endpoint
+            },
+            response: {
+                status: 200,
+                body: body || '{}', // Replace with actual response body if needed
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        };
+
+        fetch('http://localhost:8080/__admin/mappings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(wireMockData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const link = `http://localhost:8080${endpoint}`;
+            document.getElementById('generatedLink').value = link; // Set the link in the input field
+            addRunningEndpoint(method.toUpperCase(), endpoint); // Add the endpoint to the sidebar
+            saveToHistory(method.toUpperCase(), endpoint, body); // Save to history
+            apiItem.innerHTML = 'API running successfully!';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            apiItem.innerHTML = 'Error running API. Check the console for details.';
+        });
+    }
+
+    function addRunningEndpoint(method, endpoint) {
+        const runningEndpointsList = document.getElementById('runningEndpoints');
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <strong>${method}</strong> ${endpoint}
+            <button class="btn btn-danger btn-sm ms-2" onclick="deleteRunningEndpoint('${method}', '${endpoint}')">Delete</button>
+        `;
+        runningEndpointsList.appendChild(listItem);
+    }
+
+    function deleteRunningEndpoint(method, endpoint) {
+    const runningEndpointsList = document.getElementById('runningEndpoints');
+    const listItems = runningEndpointsList.getElementsByTagName('li');
+
+    for (let i = 0; i < listItems.length; i++) {
+        const listItem = listItems[i];
+        if (listItem.textContent.includes(`${method} ${endpoint}`)) {
+            runningEndpointsList.removeChild(listItem);
+            break;
+        }
+    }
+
+    const wireMockData = {
+        request: {
+            method: method,
+            url: endpoint
+        }
+    };
+
+    fetch('http://localhost:8080/__admin/mappings', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(wireMockData)
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log(`Deleted endpoint: ${method} ${endpoint}`);
+        } else {
+            console.error('Failed to delete endpoint');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+    function beautifyJSON() {
+        const textarea = document.getElementById('JSON');
+        try {
+            const uglyJSON = textarea.value;
+            const parsedJSON = JSON.parse(uglyJSON);
+            const beautifulJSON = JSON.stringify(parsedJSON, null, 4);
+            textarea.value = beautifulJSON;
+        } catch (error) {
+            alert('Invalid JSON format');
+        }
+    }
+
+    function generateLink() {
+        const jsonData = document.getElementById('JSON').value;
+        const httpMethod = document.getElementById('httpMethod').value.toUpperCase();
+        const urlEndpoint = document.getElementById('urlEndpoint').value;
+
+        if (!jsonData || !httpMethod || !urlEndpoint) {
+            alert('Please provide valid JSON, HTTP Method, and URL Endpoint');
+            return;
+        }
+
+        const wireMockData = {
+            request: {
+                method: httpMethod,
+                url: urlEndpoint
+            },
+            response: {
+                status: 200,
+                body: jsonData,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        };
+
+        fetch('http://localhost:8080/__admin/mappings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(wireMockData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const link = `http://localhost:8080${urlEndpoint}`;
+            document.getElementById('generatedLink').value = link;
+            addRunningEndpoint(httpMethod, urlEndpoint); // Add the endpoint to the sidebar
+            saveToHistory(httpMethod, urlEndpoint, jsonData); // Save to history
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    function stopFunction() {
+        const generatedLink = document.getElementById('generatedLink').value;
+        if (!generatedLink) {
+            alert('No running endpoint to stop');
+            return;
+        }
+
+        const endpoint = new URL(generatedLink).pathname;
+
+        fetch('http://localhost:8080/__admin/mappings', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const mappings = data.mappings;
+            const mappingToDelete = mappings.find(mapping => mapping.request.url === endpoint);
+
+            if (mappingToDelete) {
+                fetch(`http://localhost:8080/__admin/mappings/${mappingToDelete.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })  
+                .then(() => {
+                    document.getElementById('generatedLink').value = ''; // Clear the generated link
+                    deleteRunningEndpoint(mappingToDelete.request.method, endpoint); // Remove the endpoint from the sidebar
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                alert('No running endpoint found to stop');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function accessSwagger() {
+        window.open('http://localhost:8080/swagger-ui.html', '_blank');
+    }
+</script>
+
+</body>
+</html>

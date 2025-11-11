@@ -1,0 +1,97 @@
+{
+  "uuid": "2be296cc-7678-4eb9-afb5-2189910dd6a1",
+  "lastMigration": 32,
+  "name": "Mockoon",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "f7e8cd98-13a0-41de-a501-415d914ba6d0",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "user ",
+      "responses": [
+        {
+          "uuid": "9217f36c-6c96-42f3-a386-0123fc691b7d",
+          "body": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"age\": 30,\n  \"address\": {\n    \"streetAddress\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"postalCode\": \"10001\"\n  },\n  \"phoneNumbers\": [\n    {\n      \"type\": \"home\",\n      \"number\": \"212-555-1234\"\n    },\n    {\n      \"type\": \"work\",\n      \"number\": \"646-555-4567\"\n    }\n  ],\n  \"email\": \"john.doe@example.com\",\n  \"isRegistered\": true\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "User-Agent",
+              "value": ""
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "f7e8cd98-13a0-41de-a501-415d914ba6d0"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "file:///C:/Users/mohamed%20aziz/Desktop/stage/data%20tricks.html",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

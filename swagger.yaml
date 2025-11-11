@@ -1,0 +1,84 @@
+openapi: 3.0.1
+info:
+  title: Mock API
+  version: 1.0.0
+paths:
+  /api/Account/Register:
+    post:
+      tags:
+        - Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+            examples:
+              example-1:
+                summary: Example of RegisterDto
+                value:
+                  username: "exampleUser"
+                  password: "examplePassword"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+              examples:
+                example-1:
+                  summary: Example of UserDto
+                  value:
+                    id: "123"
+                    username: "exampleUser"
+  /api/Account/Login:
+    post:
+      tags:
+        - Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+            examples:
+              example-1:
+                summary: Example of LoginDto
+                value:
+                  username: "exampleUser"
+                  password: "examplePassword"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+              examples:
+                example-1:
+                  summary: Example of UserDto
+                  value:
+                    id: "123"
+                    username: "exampleUser"
+components:
+  schemas:
+    RegisterDto:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+    LoginDto:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string

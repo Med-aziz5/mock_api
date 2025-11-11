@@ -1,0 +1,313 @@
+swagger: "2.0"
+info:
+  description: "E-Commerce"
+  version: "1.0.0"
+  title: "Zayani Project"
+  termsOfService: "E-commerce/"
+  contact:
+    email: "zayanirami98@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "
+http://www.apache.org/licenses/LICENSE-2.0.html"
+components:
+    securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+paths:
+  /api/register:
+    post:
+      tags:
+      - "user"
+      summary: "Register user"
+      description: "Register user"
+      operationId: "registerUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          type: "object"
+          properties: 
+           id:
+            type: "integer"
+           login: 
+            type: "string"
+           password:
+            type: "string"
+           email:
+            type: "string"
+           firstname:
+            type: "string"
+           lastname:
+            type: "string"
+          example:
+            id: 1,
+            login: "user123"
+            password: "securePass!2024"
+            email: "user123@example.com"
+            firstname: "John"
+            lastname: "Doe"
+      responses:
+        "201":
+          description: "Created"
+        "400":
+          description: "Invalid username/password supplied"
+        "409":
+          description: "This user already exists"
+        "422":
+          description: "Unprocessable Entity"
+  /api/login:
+    post:
+      tags:
+      - "user"
+      summary: "Login user"
+      description: "Login user"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Login user object"
+        required: true
+        schema:
+          type: "object"
+          properties: 
+           id:
+            type: "integer"
+           login: 
+            type: "string"
+           password:
+            type: "string"
+           email:
+            type: "string"
+           firstname:
+            type: "string"
+           lastname:
+            type: "string"
+          example:
+            id: 1,
+            login: "user123"
+            password: "securePass!2024"
+            email: "user123@example.com"
+            firstname: "John"
+            lastname: "Doe"
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "Invalid username/password supplied"
+        "422":
+          description: "Unprocessable Entity"
+  /api/user:
+    get:
+      tags:
+      - "user"
+      summary: "Get user"
+      description: "Get user"
+      operationId: "GetUser"
+      security:        
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties: 
+              id:
+               type: "integer"
+              login: 
+               type: "string"
+              password:
+               type: "string"
+              email:
+               type: "string"
+              firstname:
+               type: "string"
+              lastname:
+               type: "string"
+            example:
+             id: 1,
+             login: "user123"
+             password: "securePass!2024"
+             email: "user123@example.com"
+             firstname: "John"
+             lastname: "Doe"
+        "401":
+          description: "Bad request"
+    put:
+      tags:
+      - "user"
+      summary: "Updated a user"
+      description: "Update or create a User."
+      operationId: "updateUser"
+      security:        
+        - bearerAuth: []
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "OK"
+          schema:
+            type: "object"
+            properties: 
+              id:
+               type: "integer"
+              login: 
+                type: "string"
+              password:
+                type: "string"
+              email:
+                type: "string"
+              firstname:
+                type: "string"
+              lastname:
+                type: "string"
+            example:
+                id: 1,
+                login: "user123"
+                password: "securePass!2024"
+                email: "user123@example.com"
+                firstname: "John"
+                lastname: "Doe"
+        "401":
+          description: "Bad request"
+        "400":
+          description: "Invalid user supplied"
+        "422":
+          description: "Unprocessable Entity"
+  /api/orders:
+    get:
+      tags:
+      - "orders"
+      summary: "Get order"
+      produces:
+      - "application/xml"
+      - "application/json"
+      description: "Get all order"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties: 
+              id:
+               type: "integer"
+              login: 
+               type: "string"
+              password:
+               type: "string"
+              email:
+               type: "string"
+              firstname:
+               type: "string"
+              lastname:
+               type: "string"
+            example:
+              id: 1,
+              login: "user123"
+              password: "securePass!2024"
+              email: "user123@example.com"
+              firstname: "John"
+              lastname: "Doe"
+        "401":
+          description: "Bad request"
+        "404":
+          description: "No order found"
+  /api/order/{orderId}:
+    get:
+      tags:
+      - "orders"
+      summary: "Get order by order id"
+      description: ""
+      operationId: "getOrderById"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: orderId
+        in: path
+        description: ID of order that needs to be fetched
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties: 
+              id:
+               type: "integer"
+              login: 
+               type: "string"
+              password:
+               type: "string"
+              email:
+               type: "string"
+              firstname:
+               type: "string"
+              lastname:
+               type: "string"
+            example:
+              id: 1,
+              login: "user123"
+              password: "securePass!2024"
+              email: "user123@example.com"
+              firstname: "John"
+              lastname: "Doe"
+        "401":
+          description: "Bad request"
+        "404":
+          description: "No order found"
+definitions:
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      login:
+        type: "string"
+      password:
+        type: "string"
+      email:
+        type: "string"
+      firstname:
+        type: "string"
+      lastname:
+        type: "string"
+    xml:
+      name: "User"
+  Orders:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      totalPrice:
+        type: "integer"
+      creationDate:
+        type: "string"
+        format: "date-time"
+      products:
+        type: "integer"
+      user_id:
+        type: "integer"
+    xml:
+      name: "Order"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "
+http://swagger.io"
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /FliyFly/E-commerce/1.0.0
+schemes:
+- https

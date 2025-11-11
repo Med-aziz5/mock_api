@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Display</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Fetch and Display JSON</h1>
+        <button class="btn btn-primary" id="fetchButton">Fetch JSON</button>
+        <pre id="jsonDisplay" class="mt-3"></pre>
+    </div>
+ 
+    <script>
+        async function fetchJSON() {
+            const endpoint = 'http://localhost:8080/your-endpoint'; // Update to your endpoint
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const jsonObject = await response.json();
+                const prettyJson = JSON.stringify(jsonObject, null, 4);
+                document.getElementById('jsonDisplay').textContent = prettyJson;
+            } catch (e) {
+                document.getElementById('jsonDisplay').textContent = 'Error fetching JSON: ' + e.message;
+                console.error('Error fetching JSON:', e);
+            }
+        }
+
+        document.getElementById('fetchButton').addEventListener('click', fetchJSON);
+    </script>
+</body>
+</html>
